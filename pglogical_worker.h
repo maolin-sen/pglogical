@@ -17,12 +17,23 @@
 
 #include "pglogical.h"
 
+
+/*
+用于表示 pglogical 扩展中的不同类型的后台工作进程。
+PGLogicalWorkerType 枚举类型包含以下四个值和其对应的意义：
+
+PGLOGICAL_WORKER_NONE：未使用的槽（slot）。这个值用于表示未被分配到任何后台工作进程的空闲槽。
+PGLOGICAL_WORKER_MANAGER：管理者（Manager）。这个值用于表示执行与管理 pglogical 扩展相关的后台工作进程。
+PGLOGICAL_WORKER_APPLY：应用（Apply）。这个值用于表示执行逻辑复制的后台工作进程，负责解析和应用逻辑复制消息以将数据从源数据库复制到目标数据库。
+PGLOGICAL_WORKER_SYNC：特殊类型的应用（Apply），用于同步特定表的后台工作进程。这个值用于表示一个特殊的应用工作进程，专门用于同步特定的表。
+
+通过使用这些不同的枚举值，可以标识和区分不同类型的 pglogical 后台工作进程，并在内部实现中进行相应的处理和调度。
+*/
 typedef enum {
 	PGLOGICAL_WORKER_NONE,		/* Unused slot. */
 	PGLOGICAL_WORKER_MANAGER,	/* Manager. */
 	PGLOGICAL_WORKER_APPLY,		/* Apply. */
-	PGLOGICAL_WORKER_SYNC		/* Special type of Apply that synchronizes
-								 * one table. */
+	PGLOGICAL_WORKER_SYNC		/* Special type of Apply that synchronizes one table. */
 } PGLogicalWorkerType;
 
 typedef struct PGLogicalApplyWorker

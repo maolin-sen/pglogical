@@ -654,8 +654,7 @@ start_manager_workers(void)
 /*
  * Static bgworker used for initialization and management (our main process).
  */
-void
-pglogical_supervisor_main(Datum main_arg)
+void pglogical_supervisor_main(Datum main_arg)
 {
 	/* Establish signal handlers. */
 	pqsignal(SIGTERM, handle_sigterm);
@@ -689,7 +688,8 @@ pglogical_supervisor_main(Datum main_arg)
 	BackgroundWorkerInitializeConnection("postgres", NULL);
 #endif
 
-	/* Main wait loop. */
+	/* Main wait loop. 
+	如果订阅发生了变化，启动管理工作者，并在等待事件发生时等待一段时间。一旦事件发生或等待超时，就会继续执行后续代码。*/
 	while (!got_SIGTERM)
     {
 		int rc;
@@ -766,6 +766,24 @@ pglogical_temp_directory_assing_hook(const char *newval, void *extra)
 
 /*
  * Entry point for this module.
+
+在 PostgreSQL 中，配置选项可以用于在运行时动态地修改数据库的行为。
+通过使用 DefineCustomEnumVariable 函数，可以定义一个枚举类型的配置选项，并定义可接受的枚举值。
+void DefineCustomEnumVariable(const char *name, const char *short_desc,
+                             const char *long_desc, int *valueAddr,
+                             int bootValue, const char *bootString,
+                             const char *assignHook,
+                             const char *showHook);
+
+参数说明：
+name：配置选项的名称。
+short_desc 和 long_desc：配置选项的简短描述和详细描述。
+valueAddr：配置选项的值的存储地址。
+bootValue：配置选项的初始默认值。
+bootString：配置选项的字符串形式的初始默认值。
+assignHook：配置选项更新时的回调函数（可选）。
+showHook：显示配置选项值时的回调函数（可选）。
+
  */
 void
 _PG_init(void)
@@ -881,3 +899,5 @@ _PG_init(void)
 
 	RegisterBackgroundWorker(&bgw);
 }
+
+
